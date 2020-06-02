@@ -1,0 +1,6 @@
+This code is one of the examples taken from the Mesa toolkit,
+and can be found online here: https://github.com/projectmesa/mesa
+
+Changes have been made to model.py
+The change enables the maximum vision and maximum metabolism
+of agents to be set as parameters when initiating the model.
