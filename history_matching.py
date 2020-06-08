@@ -1,7 +1,7 @@
 import math
-import matplotlib.pyplot as plt
 import numpy as np
 import random
+import multiprocessing as mp
 
 
 # set before running history matching waves
@@ -13,15 +13,20 @@ k = 25  # total ensembles run for each input (should be at least 25)
 v_ens = 0  # ensemble variance; initially unknown; automatically calculated
 
 
-def _get_v_ens(X):
-    """ Calculate ensemble variance for inputs X.
+def _v_ens_x(x):
+    """ Calculate the ensemble variance for the input x. """
+    return np.var([f(x) for _ in range(k)], ddof=1)
+
+
+def v_ens_X(X):
+    """ Calculate the average ensemble variance across inputs X.
 
     Each value x in X represents a different input parameter to test.
     Returns average of the variances for each x across k ensembles.
     """
-    vars_range = []
-    for x in X:
-        vars_range.append(np.var([f(x) for _ in range(k)], ddof=1))
+    pool = mp.Pool(mp.cpu_count())
+    vars_range = pool.map(_v_ens_x, X)
+    pool.close()
     return np.mean(vars_range)
 
 
@@ -37,10 +42,10 @@ def is_all_plausible(prev_plaus_space, new_plaus_space):
     # If they're the same size, they must be the same
     # NOTE: that this method will likely need to be updated if we change
     # the plausible space to not always be discrete and convex
-    return prev_plaus_space.size == new_plaus_space.size
+    return len(prev_plaus_space) == len(new_plaus_space)
 
 
-def is_var_small(new_plaus_space):
+def is_v_ens_x_small(new_plaus_space):
     """ Stopping criteria.
         Test if the variance of plausible space is less than model variance.
     """
@@ -48,29 +53,25 @@ def is_var_small(new_plaus_space):
     return np.var(new_plaus_space) < v_ens
 
 
-def wave(plaus_space, plot=False):
+def wave(plaus_space):
     """ Run a wave of history matching.
 
-    plaus_space is (for now) a list of discrete points in a convex space.
-    Returns the new plausible points found in plaus_space.
+    plaus_space is (for now) a list of discrete points.
+    Returns the new plausible points found in plaus_space
+    plus the implausibility scores.
     """
-    # get new ensemble variance
-    globals()['v_ens'] = _get_v_ens([plaus_space[i]
+    # Get the new ensemble variance using a selection of three inputs from X,
+    # where these inputs are evenly spread across the plausible space.
+    # In the future, an optimised design such as LHS, will be preferred.
+    globals()['v_ens'] = v_ens_X([plaus_space[i]
                                      for i in range(0,
                                         len(plaus_space),
                                         math.ceil(len(plaus_space)/3))])
     new_plaus_space = []
-    plt.clf()
-    for x in plaus_space:
-        score = _implaus(x)
-        if score < 3:
-            plt.scatter(x, score, color=u'#1f77b4')
-            new_plaus_space.append(x)
-        else:
-            plt.scatter(x, score, color=u'#ff7f0e')
-    plt.axhline(y=3, xmin=0, xmax=1)
-    plt.xlim(min(new_plaus_space), max(new_plaus_space))
-    if plot:
-        plt.xlim(min(plaus_space), max(plaus_space))
-        plt.show()
-    return np.array(new_plaus_space)
+    pool = mp.Pool(mp.cpu_count())
+    implaus_scores = pool.map(_implaus, plaus_space)
+    pool.close()
+    for i in range(len(plaus_space)):
+        if implaus_scores[i] < 3:
+            new_plaus_space.append(plaus_space[i])
+    return new_plaus_space, implaus_scores
