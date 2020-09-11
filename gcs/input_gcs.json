@@ -1,0 +1,161 @@
+{
+  "domains":[
+    {
+      "name":"room",
+      "background":"station.png",
+      "px":0.05,
+      "width":null,
+      "height":null,
+      "wall_colors":[ [0,0,0] ],
+      "destinations":[
+        {
+          "name": "door1",
+          "colors": [ [0,255,0] ],
+          "excluded_colors":[ [0,0,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0] ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door2",
+          "colors": [ [0,254,0] ],
+          "excluded_colors":[ [0,0,0] , [0,255,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0] ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door3",
+          "colors": [ [0,253,0] , [0,255,0], [0,254,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0] ],
+          "excluded_colors":[ [0,0,0] ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door4",
+          "colors": [ [0,252,0] ],
+          "excluded_colors":[ [0,0,0] , [0,255,0], [0,254,0], [0,253,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0] ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door5",
+          "colors": [ [0,251,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0]  ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door6",
+          "colors": [ [0,250,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,249,0], [0,248,0], [0,247,0]  ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door7",
+          "colors": [ [0,249,0] ],
+          "excluded_colors":[ [0,0,0] , [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,248,0], [0,247,0] ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door8",
+          "colors": [ [0,248,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,247,0] ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door9",
+          "colors": [ [0,247,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0]  ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        }
+      ]
+    }
+  ],
+  "people_init":[
+    {
+      "domain": "room",
+      "groups": [
+        {
+          "nb": 2,
+          "radius_distribution": ["uniform",0.4,0.6],
+          "velocity_distribution": ["normal",1.2,0.1],
+          "box": [5,30,5,50],
+          "destination": "door1"
+        },
+        {
+          "nb": 2,
+          "radius_distribution": ["uniform",0.4,0.6],
+          "velocity_distribution": ["normal",1.2,0.1],
+          "box": [5,30,5,50],
+          "destination": "door2"
+        }
+      ]
+    }
+  ],
+  "sensors":[
+    {
+      "name": "sensor1",
+      "domain": "room",
+      "line": [2.8,34,2.8,25]
+    },
+    {
+      "name": "sensor2",
+      "domain": "room",
+      "line": [34,36,34,45]
+    }
+  ],
+  "prefix":"results/",
+  "seed":40,
+  "with_graphes": true,
+  "Tf":50.0,
+  "dt":0.005,
+  "drawper":100,
+  "mass":80.0,
+  "tau":0.8,
+  "F":2000.0,
+  "kappa":120000.0,
+  "delta":0.08,
+  "Fwall":2000.0,
+  "lambda":0.5,
+  "eta":240000.0,
+  "projection_method": "cvxopt",
+  "dmax":10,
+  "dmin_people":0.5,
+  "dmin_walls":10,
+  "plot_people":true,
+  "plot_contacts":false,
+  "plot_desired_velocities":false,
+  "plot_velocities":false,
+  "plot_paths":true,
+  "plot_sensors":false
+}
