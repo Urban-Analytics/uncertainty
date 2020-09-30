@@ -1,0 +1,3 @@
+The model assumes:
+- people are travelling individually (there are no groups)
+- people enter and exit from different gates (whilst in reality there are likely to be some people entering the environment, waiting (e.g. for a friend), and then exiting via the same gate).

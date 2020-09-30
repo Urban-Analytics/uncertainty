@@ -3,15 +3,25 @@
     {
       "name":"room",
       "background":"station.png",
-      "px":0.05,
+      "px":0.1,
       "width":null,
       "height":null,
       "wall_colors":[ [0,0,0] ],
       "destinations":[
         {
-          "name": "door1",
+          "name": "door0",
           "colors": [ [0,255,0] ],
-          "excluded_colors":[ [0,0,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0] ],
+          "excluded_colors":[ [0,0,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0], [0,246,0], [0,245,0] ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door1",
+          "colors": [ [0,254,0] ],
+          "excluded_colors":[ [0,0,0] , [0,255,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0], [0,246,0], [0,245,0] ],
           "desired_velocity_from_color":[],
           "velocity_scale": 1,
           "next_destination": null,
@@ -20,8 +30,8 @@
         },
         {
           "name": "door2",
-          "colors": [ [0,254,0] ],
-          "excluded_colors":[ [0,0,0] , [0,255,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0] ],
+          "colors": [ [0,253,0] ],
+          "excluded_colors":[ [0,0,0] , [0,255,0], [0,254,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0], [0,246,0], [0,245,0] ],
           "desired_velocity_from_color":[],
           "velocity_scale": 1,
           "next_destination": null,
@@ -30,8 +40,8 @@
         },
         {
           "name": "door3",
-          "colors": [ [0,253,0] , [0,255,0], [0,254,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0] ],
-          "excluded_colors":[ [0,0,0] ],
+          "colors": [ [0,252,0] ],
+          "excluded_colors":[ [0,0,0] , [0,255,0], [0,254,0], [0,253,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0], [0,246,0], [0,245,0] ],
           "desired_velocity_from_color":[],
           "velocity_scale": 1,
           "next_destination": null,
@@ -40,8 +50,8 @@
         },
         {
           "name": "door4",
-          "colors": [ [0,252,0] ],
-          "excluded_colors":[ [0,0,0] , [0,255,0], [0,254,0], [0,253,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0] ],
+          "colors": [ [0,251,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0], [0,246,0], [0,245,0]  ],
           "desired_velocity_from_color":[],
           "velocity_scale": 1,
           "next_destination": null,
@@ -50,8 +60,8 @@
         },
         {
           "name": "door5",
-          "colors": [ [0,251,0] ],
-          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0]  ],
+          "colors": [ [0,250,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,249,0], [0,248,0], [0,247,0], [0,246,0], [0,245,0]  ],
           "desired_velocity_from_color":[],
           "velocity_scale": 1,
           "next_destination": null,
@@ -60,8 +70,8 @@
         },
         {
           "name": "door6",
-          "colors": [ [0,250,0] ],
-          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,249,0], [0,248,0], [0,247,0]  ],
+          "colors": [ [0,249,0] ],
+          "excluded_colors":[ [0,0,0] , [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,248,0], [0,247,0], [0,246,0], [0,245,0] ],
           "desired_velocity_from_color":[],
           "velocity_scale": 1,
           "next_destination": null,
@@ -70,8 +80,8 @@
         },
         {
           "name": "door7",
-          "colors": [ [0,249,0] ],
-          "excluded_colors":[ [0,0,0] , [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,248,0], [0,247,0] ],
+          "colors": [ [0,248,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,247,0], [0,246,0], [0,245,0] ],
           "desired_velocity_from_color":[],
           "velocity_scale": 1,
           "next_destination": null,
@@ -80,8 +90,8 @@
         },
         {
           "name": "door8",
-          "colors": [ [0,248,0] ],
-          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,247,0] ],
+          "colors": [ [0,247,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,246,0], [0,245,0]  ],
           "desired_velocity_from_color":[],
           "velocity_scale": 1,
           "next_destination": null,
@@ -90,8 +100,18 @@
         },
         {
           "name": "door9",
-          "colors": [ [0,247,0] ],
-          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0]  ],
+          "colors": [ [0,246,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0], [0,245,0]  ],
+          "desired_velocity_from_color":[],
+          "velocity_scale": 1,
+          "next_destination": null,
+          "next_domain": null,
+          "next_transit_box":null
+        },
+        {
+          "name": "door10",
+          "colors": [ [0,245,0] ],
+          "excluded_colors":[ [0,0,0], [0,255,0], [0,254,0], [0,253,0], [0,252,0], [0,251,0], [0,250,0], [0,249,0], [0,248,0], [0,247,0], [0,246,0]  ],
           "desired_velocity_from_color":[],
           "velocity_scale": 1,
           "next_destination": null,
@@ -106,39 +126,77 @@
       "domain": "room",
       "groups": [
         {
-          "nb": 2,
+          "nb": 1,
           "radius_distribution": ["uniform",0.4,0.6],
           "velocity_distribution": ["normal",1.2,0.1],
-          "box": [5,30,5,50],
+          "box": [8.5, 17, 0.6, 2],
           "destination": "door1"
-        },
-        {
-          "nb": 2,
-          "radius_distribution": ["uniform",0.4,0.6],
-          "velocity_distribution": ["normal",1.2,0.1],
-          "box": [5,30,5,50],
-          "destination": "door2"
         }
       ]
     }
   ],
   "sensors":[
     {
+      "name": "sensor0",
+      "domain": "room",
+      "line": [2,10,2,29]
+    },
+    {
       "name": "sensor1",
       "domain": "room",
-      "line": [2.8,34,2.8,25]
+      "line": [1,48,18,48]
     },
     {
       "name": "sensor2",
       "domain": "room",
-      "line": [34,36,34,45]
+      "line": [31,48,49,48]
+    },
+    {
+      "name": "sensor3",
+      "domain": "room",
+      "line": [50,42,50,49]
+    },
+    {
+      "name": "sensor4",
+      "domain": "room",
+      "line": [50,28,50,40]
+    },
+    {
+      "name": "sensor5",
+      "domain": "room",
+      "line": [50,13,50,25]
+    },
+    {
+      "name": "sensor6",
+      "domain": "room",
+      "line": [50,0.6,50,9]
+    },
+    {
+      "name": "sensor7",
+      "domain": "room",
+      "line": [37.5,2,50,2]
+    },
+    {
+      "name": "sensor8",
+      "domain": "room",
+      "line": [25,2,37.5,2]
+    },
+    {
+      "name": "sensor9",
+      "domain": "room",
+      "line": [12.5,2,25,2]
+    },
+    {
+      "name": "sensor10",
+      "domain": "room",
+      "line": [0.6,2,12.5,2]
     }
   ],
   "prefix":"results/",
   "seed":40,
-  "with_graphes": true,
-  "Tf":50.0,
-  "dt":0.005,
+  "with_graphes": false,
+  "Tf":141.0,
+  "dt":0.02,
   "drawper":100,
   "mass":80.0,
   "tau":0.8,

@@ -15,33 +15,72 @@ from cromosim import *
 from cromosim.micro import *
 from optparse import OptionParser
 import json
+import scipy.stats as st
+
+
+ENTRY_TIMER = st.mielke(k=0.75, s=2.26, loc=0, scale=0.71)
+next_time = ENTRY_TIMER.rvs()
+DOORS = ['door0', 'door1', 'door2', 'door3', 'door4', 'door5',
+         'door6', 'door7', 'door8', 'door9', 'door10']
+TOTAL_DOORS = len(DOORS)
+px = 0.087
+DOOR_LOCS = ((0.6, 2, 11, 28),
+             (1.5, 18, 48, 49.4),
+             (32, 49, 48, 49.4),
+             (50, 52.3, 43, 48),
+             (50, 52.3, 29, 39),
+             (50, 52.3, 14, 24),
+             (50, 52.3, 0.6, 9),
+             (37.5, 50, 0.6, 2),
+             (25, 37.5, 0.6, 2),
+             (12.5, 25, 0.6, 2),
+             (0.9, 12.5, 0.6, 2))
+
+ENTRY_WEIGHTS = ((9, 0.266), (1, 0.496), (8, 0.7), (2, 0.809),
+                 (0, 0.908), (4, 0.934), (10, 0.96), (5, 0.982),
+                 (3, 0.989), (6, 0.996), (7, 1.0))
+
+
+
+EXIT_WEIGHTS = (((5, 0.37), (1, 0.703), (8, 0.851), (2, 0.925), (4, 0.962), (10, 1.0)),
+                ((5, 0.333), (9, 0.523), (8, 0.666), (7, 0.793), (10, 0.872), (0, 0.935), (4, 1.0)),
+                ((9, 0.3), (5, 0.533), (10, 0.733), (4, 0.833), (7, 0.9), (0, 0.933), (3, 0.966), (8, 1.0)),
+                ((0, 0.5), (9, 1.0)),
+                ((2, 0.571), (8, 0.857), (7, 1.0)),
+                ((2, 0.333), (3, 0.666), (0, 0.833), (9, 1.0)),
+                ((0, 0.5), (4, 1.0)),
+                ((5, 1.0),),
+                ((5, 0.5), (2, 0.679), (1, 0.84), (4, 0.929), (3, 0.965), (0, 0.983), (6, 1.00)),
+                ((5, 0.438), (1, 0.698), (2, 0.808), (4, 0.89), (0, 0.958), (3, 0.985), (6, 1.0)),
+                ((1, 0.714), (0, 0.857), (2, 1.0)))
+
+ANALYSIS = []
+
+#NOTE: you are not using the seed when choosing a random entry and exit
+#To fix this, there should hopefully be some kind of seed.next() function
+def choose_entry():
+    w = random.randint(0, 1000) / 1000.0
+    ENTRY, WEIGHT = 0, 1
+    for ew in ENTRY_WEIGHTS:
+        if w <= ew[WEIGHT]:
+            return ew[ENTRY]  # enter from a region within the given box
+
+def choose_exit(entry):
+    w = random.randint(0, 100) / 100.0
+    EXIT, WEIGHT = 0, 1
+    for ew in EXIT_WEIGHTS[entry]:
+        if w <= ew[WEIGHT]:
+            return DOORS[ew[EXIT]]  # exit through the door with this label
 
 
 def add_new_person(all_people):
-    doors = ['door1', 'door2', 'door3', 'door4', 'door5',
-             'door6', 'door7', 'door8', 'door9']
-    door_locs = [[2.5, 9, 51, 52.5],
-                 [26, 32, 51, 52.5],
-                 [31.5, 33, 38.5, 44.5],
-                 [31.5, 33, 28, 32.5],
-                 [31.5, 33, 15, 22.5],
-                 [31.5, 33, 3, 9.5],
-                 [25.5, 33.5, 2.5, 4],
-                 [2.5, 7, 2.5, 4],        
-                 [3.0, 4.5, 27.5, 32.5]]
-    # pick a random door to appear from
-    loc_i = random.randint(0, 8)
-    # remove appearance door from possible exit doors
-    doors.pop(loc_i)
-    # pick an exit destination door
-    dest = doors[random.randint(0, 7)]  # 8 doors remain to choose from
+    entry = choose_entry()
+    dest = choose_exit(entry)
     groups = [{'nb': 1,
                'radius_distribution': ['uniform', 0.4, 0.6],
                'velocity_distribution': ['normal', 1.2, 0.1],
-               'box': door_locs[loc_i],
+               'box': DOOR_LOCS[entry],
                'destination': dest}] 
-    #NOTE: you are not using the seed here as it created duplicate people
-    # to fix this, there should hopefully be some kind of seed.next() function
     new_people = people_initialization(dom, groups, dt, dmin_people=dmin_people,
                                     dmin_walls=dmin_walls, itermax=10,
                                     projection_method=projection_method, verbose=False)
@@ -57,7 +96,6 @@ def add_new_person(all_people):
     for k in ('xyrv', 'Vd', 'U', 'Uold', 'id', 'destinations'):
         for v in new_people[k]:
             info_space = all_people[peopledom["domain"]][k]
-            print(info_space.shape)
             try:
                 row, col = all_people[peopledom["domain"]][k].shape
                 all_people[peopledom["domain"]][k] = np.resize(all_people[peopledom["domain"]][k], (row+1, col))
@@ -76,6 +114,21 @@ def add_new_person(all_people):
                         str(counter).zfill(6)+'.png')
     #print("===> All people = ",all_people[peopledom["domain"]]['paths'])
 
+def analyse(all_people):
+    regions = ((0, 26.5, 0, 25),  #xmin, xmax, ymin, ymax
+                 (26.5, 53, 0, 25),
+                 (0, 26.5, 25, 50),
+                 (26.5, 53, 25, 50))
+    def get_region(x, y):
+        for ix in range(len(regions)):
+            if (regions[ix][0] <= x < regions[ix][1] and
+                    regions[ix][2] <= y < regions[ix][3]):
+                return ix
+    all_xyrv = all_people['room']['xyrv']
+    region_counts = [0 for i in range(len(regions))]
+    for xyrv in all_xyrv:
+        region_counts[get_region(xyrv[0], xyrv[1])] += 1
+    return region_counts
 
 plt.ion()
 
@@ -150,7 +203,7 @@ print("===> ONLY used during initialization ! Minimal distance between a \
 domains = {}
 for i,jdom in enumerate(json_domains):
     jname = jdom["name"]
-    print("===> Build domain number ",i," : ",jname)
+    #print("===> Build domain number ",i," : ",jname)
     jbg = jdom["background"]
     jpx = jdom["px"]
     jwidth = jdom["width"]
@@ -177,7 +230,7 @@ for i,jdom in enumerate(json_domains):
         next_destination=dd["next_destination"],
         next_domain=dd["next_domain"],
         next_transit_box=dd["next_transit_box"])
-        print("===> Destination : ",dest)
+        #print("===> Destination : ",dest)
         dom.add_destination(dest)
         #if (with_graphes):
         #    dom.plot_desired_velocity(dd["name"],id=100*i+10+j,step=20)
@@ -219,10 +272,10 @@ all_people = {}
 for i,peopledom in enumerate(json_people_init):
     dom = domains[peopledom["domain"]]
     groups = peopledom["groups"]
-    print("===> Group number ",i,", domain = ",peopledom["domain"])
+    #print("===> Group number ",i,", domain = ",peopledom["domain"])
     people = people_initialization(dom, groups, dt,
         dmin_people=dmin_people, dmin_walls=dmin_walls, seed=seed,
-        itermax=10, projection_method=projection_method, verbose=True)
+        itermax=10, projection_method=projection_method, verbose=False)
     I, J, Vd = dom.people_desired_velocity(people["xyrv"],
         people["destinations"])
     people["Vd"] = Vd
@@ -240,7 +293,6 @@ for i,peopledom in enumerate(json_people_init):
     all_people[peopledom["domain"]] = people
 print("===> All people = ",all_people)
 #add_new_person(all_people)
-#add_new_person(all_people)
 #print("===> All people = ",all_people)
 
 #"""
@@ -250,11 +302,12 @@ print("===> All people = ",all_people)
 cc = 0
 draw = True
 
-while (t<Tf and all_people['room']["Uold"].shape[0] > 0):
-    print("\n===> Time = "+str(t))
+#while (t<Tf and all_people['room']["Uold"].shape[0] > 0):
+while t < Tf:
+    #print("\n===> Time = "+str(t))
     ## Compute people desired velocity
     for idom,name in enumerate(domains):
-        print("===> Compute desired velocity for domain ",name)
+        #print("===> Compute desired velocity for domain ",name)
         dom = domains[name]
         people = all_people[name]
         I, J, Vd = dom.people_desired_velocity(people["xyrv"],
@@ -264,13 +317,13 @@ while (t<Tf and all_people['room']["Uold"].shape[0] > 0):
         people["J"] = J
 
     ## Look at if there are people in the transit boxes
-    print("===> Find people who have to be duplicated")
+    #print("===> Find people who have to be duplicated")
     virtual_people = find_duplicate_people(all_people, domains)
     #print("     virtual_people : ",virtual_people)
 
     ## Social forces
     for idom,name in enumerate(domains):
-        print("===> Compute social forces for domain ",name)
+        #print("===> Compute social forces for domain ",name)
         dom = domains[name]
         people = all_people[name]
 
@@ -296,7 +349,7 @@ while (t<Tf and all_people['room']["Uold"].shape[0] > 0):
                 sys.exit()
 
             contacts = compute_contacts(dom, xyrv, dmax)
-            print("     Number of contacts: ",contacts.shape[0])
+            #print("     Number of contacts: ",contacts.shape[0])
             Forces = compute_forces( F, Fwall, xyrv, contacts, Uold, Vd,
                                      lambda_, delta, kappa, eta)
             nn = people["xyrv"].shape[0]
@@ -339,12 +392,18 @@ while (t<Tf and all_people['room']["Uold"].shape[0] > 0):
         all_people[name]["Uold"] = all_people[name]["U"]
 
     ## Print the number of persons for each domain
-    for idom,name in enumerate(domains):
-        print("===> Domain ",name," nb of persons = ",
-            all_people[name]["xyrv"].shape[0])
+    #for idom,name in enumerate(domains):
+        #print("===> Domain ",name," nb of persons = ",
+        #    all_people[name]["xyrv"].shape[0])
     
-    if round(t, 3)  % 5.000 == 0:
+    if t > next_time:
         add_new_person(all_people)
+        next_time = t + ENTRY_TIMER.rvs()
+    
+    if round(t, 2) >= 60 and round(t, 2) % 10 == 0:
+        print(t)
+        analysis = analyse(all_people)
+        ANALYSIS.append(analysis)
 
     t += dt
     cc += 1
@@ -355,12 +414,17 @@ while (t<Tf and all_people['room']["Uold"].shape[0] > 0):
     else:
         draw = False
 
+#analysis = analyse(all_people)
+#print(analysis)
+#print('total people:', sum(analysis))
+print(ANALYSIS)
 
-#for idom,domain_name in enumerate(all_sensors):
-    #print("===> Plot sensors of domain ",domain_name)
-    #plot_sensors(100*idom+40, all_sensors[domain_name], t, savefig=False,
-                #filename=prefix+'sensor_'+str(i)+'_'+str(counter)+'.png')
-    #plt.pause(0.01)
+
+# ~ for idom,domain_name in enumerate(all_sensors):
+    # ~ print("===> Plot sensors of domain ",domain_name)
+    # ~ plot_sensors(100*idom+40, all_sensors[domain_name], t, savefig=False,
+                # ~ filename=prefix+'sensor_'+str(i)+'_'+str(counter)+'.png')
+    # ~ plt.pause(0.01)
 
 plt.ioff()
 plt.show()
