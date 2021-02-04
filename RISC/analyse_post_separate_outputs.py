@@ -12,11 +12,11 @@ thresholds = np.linspace(0, 50, 201)
 
 # to automatically reconfigure plots if not showing all 16 drivers
 total_drivers = len(driver_indexes)
-start = driver_indexes[0]
+start = 12
 
 colours = ('darkorange', 'maroon', 'maroon', 'darkorange',
            'darkorange', 'darkorange', 'darkorange', 'darkorange',
-           'indianred', 'indianred', 'indianred', 'indianred', 
+           'indianred', 'indianred', 'indianred', 'indianred',
            'limegreen', 'limegreen', 'limegreen', 'limegreen')
 col_labels = ['n small', 'n medium', 'n large']
 
@@ -37,8 +37,8 @@ def get_post(driver_i):
     return post
 
 
-fig, axs = plt.subplots(total_drivers, 3, figsize=(8, 8), sharex='col', sharey='row')
-for driver_i in driver_indexes:
+fig, axs = plt.subplots(total_drivers-start, 3, figsize=(8, 8), sharex='col', sharey='row')
+for driver_i in driver_indexes[start:]:
     post = get_post(driver_i)
     for output in range(len(helper.OUTPUTS)):
         axs[driver_i-start][output].plot(thresholds,
@@ -55,16 +55,15 @@ for ax, col in zip(axs[0], range(3)):
     ax.set_title(col_labels[col])
 for ax, col in zip(axs[-1], range(3)):
     ax.set_xlabel('threshold')
-    # ~ if col == 0:
-        # ~ ax.set_xticks(range(0, 4))
-        # ~ ax.set_xlim(0, 3)
-    # ~ elif col == 1:
-        # ~ ax.set_xticks(range(0, 4))
-        # ~ ax.set_xlim(0, 3)
-    # ~ else:
-        # ~ ax.set_xticks(range(0, 11, 5))
-        # ~ ax.set_xlim(0, 10)
+    if col == 0:
+        ax.set_xticks(range(0, 4))
+        ax.set_xlim(0, 3)
+    elif col == 1:
+        ax.set_xticks(range(0, 4))
+        ax.set_xlim(0, 3)
+    else:
+        ax.set_xticks(range(0, 11, 5))
+        ax.set_xlim(0, 10)
 for ax, row in zip(axs[:,0], range(total_drivers)):
-    ax.set_ylabel('Model ' + str(row+start), rotation=0, size='medium', labelpad=60)
+    ax.set_ylabel('Model ' + str(row+start+1), rotation=0, size='medium', labelpad=60)
 plt.show()
-                                
