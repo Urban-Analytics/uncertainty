@@ -58,16 +58,16 @@ def run():
     history = abc.run(max_nr_populations=max_iterations)
 
     # Save abc history using shelve...
-    db = shelve.open('%s/abc_history.shelf' % id)
+    db = shelve.open('results/%s/abc_history.shelf' % id)
     db['history'] = history
     db.close()
     # ... and save the distribution and weights using pickle
     # as there are sometimes issues saving the history object
     for t in range(max_iterations):
         df, w = history.get_distribution(t=t)
-        with open('%s/df_%d.pkl' % (id, t), 'wb') as f:
+        with open('results/%s/df_%d.pkl' % (id, t), 'wb') as f:
             pickle.dump(df, f)
-        with open('%s/w_%d.pkl' % (id, t), 'wb') as f:
+        with open('results/%s/w_%d.pkl' % (id, t), 'wb') as f:
             pickle.dump(w, f)
     return history
 
@@ -76,9 +76,9 @@ def plot_all(show=True):
     """ Plot each iteration of the ABC runs. """
     fig, axes = plt.subplots(max_iterations, 1, figsize=(6, 12))
     for t in range(max_iterations):
-        with open('%s/df_%d.pkl' % (id, t), 'rb') as f:
+        with open('results/%s/df_%d.pkl' % (id, t), 'rb') as f:
             df = pickle.load(f)
-        with open('%s/w_%d.pkl' % (id, t), 'rb') as f:
+        with open('results/%s/w_%d.pkl' % (id, t), 'rb') as f:
             w = pickle.load(f)
         axes[t].hist2d(x=df['vision'], y=df['metab'], weights=w, density=True,
                        bins=((xticks, yticks)), cmap='magma')
@@ -90,14 +90,14 @@ def plot_all(show=True):
     if show:
         plt.show()
     else:
-        plt.savefig('%s/abc_results.pdf' % id)
+        plt.savefig('results/%s/abc_results.pdf' % id)
 
 
 def plot_last(show=True):
     """ Plot the final iteration of the ABC runs. """
-    with open('%s/df_%d.pkl' % (id, max_iterations-1), 'rb') as f:
+    with open('results/%s/df_%d.pkl' % (id, max_iterations-1), 'rb') as f:
         df = pickle.load(f)
-    with open('%s/w_%d.pkl' % (id, max_iterations-1), 'rb') as f:
+    with open('results/%s/w_%d.pkl' % (id, max_iterations-1), 'rb') as f:
         w = pickle.load(f)
     fig, axes = plt.subplots(1, 1, figsize=(9, 3))
     p = plt.hist2d(x=df['vision'], y=df['metab'], weights=w, density=True,
@@ -110,9 +110,9 @@ def plot_last(show=True):
     if show:
         plt.show()
     else:
-        plt.savefig('%s/abc_results.pdf' % id)
+        plt.savefig('results/%s/abc_results.pdf' % id)
 
 if __name__ == '__main__':
-    #run()
+    run()
     #plot_all()
-    plot_last()
+    #plot_last()

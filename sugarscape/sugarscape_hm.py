@@ -9,6 +9,7 @@ import pickle
 
 from sugarscape_cg.model import SugarscapeCg
 
+# import history_matching from parent directory
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
@@ -72,12 +73,12 @@ def plot_wave(wave, show=True):
 
 
 def plot_saved_results(results_dir, save=False):
-    with open('%s/hm.pkl' % results_dir, 'rb') as pfile:
+    with open('results/%s/hm.pkl' % results_dir, 'rb') as pfile:
         results = pickle.load(pfile)
     for wave in results:
         if save:
             plot_wave(wave, show=False)
-            plt.savefig('%s/wave_%d.pdf' % (results_dir, wave['wave_no']))
+            plt.savefig('results/%s/wave_%d.pdf' % (results_dir, wave['wave_no']))
         else:
             plot_wave(wave, show=True)
 
@@ -95,7 +96,7 @@ def example_2d():
     os.mkdir(results_dir)
     wave_no = 1
     obs = 66  # metab 4, vision 6
-    history_matching.k = 4
+    history_matching.k = 200
     history_matching.sim_func = run_simulation
     history_matching.error_func = lambda y: abs(y - obs)
     plaus_metabolism = range(1, 5)
@@ -118,4 +119,5 @@ def example_2d():
 
 if __name__ == '__main__':
     #example_2d()
-    plot_saved_results('210129_114432', save=False)
+    #plot_saved_results('210205_160332', save=False)
+    plot_saved_results('210209_134031', save=True)
