@@ -1,0 +1,9 @@
+Note that netlogo model SM2_hoopoes.nlogo is not our own work.
+It is from the Supplementary Materials belonging to:
+
+  Thiele, JC, Kurth, W & Grimm, V: 
+  Facilitating parameter estimation and sensitivity analysis of agent-based models: 
+  A cookbook using NetLogo and R.
+  
+The nlogo file was obtained from:
+https://sourceforge.net/projects/calibrationsensitivityanalysis/
