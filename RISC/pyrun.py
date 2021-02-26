@@ -11,15 +11,15 @@ NETLOGO_VERSION = '6.1'
 
 drivers = ((False, False, False, False), (False, False, False, True),
            (False, False, True, True), (False, False, True, False),
-           (False, True, False, True), (False, True, False, False),
-           (False, True, True, True), (False, True, True, False),
-           (True, False, False, True), (True, False, False, False),
-           (True, False, True, True), (True, False, True, False),
-           (True, True, False, True), (True, True, False, False),
-           (True, True, True, True), (True, True, True, False)
+           False, True, False, True), (False, True, False, False),
+           False, True, True, True), (False, True, True, False),
+           True, False, False, True), (True, False, False, False),
+           True, False, True, True), (True, False, True, False),
+           True, True, False, True), (True, True, False, False),
+           True, True, True, True), (True, True, True, False)
           )
 
-drivers = ((False, False, False, False),)
+
 
 modelfile = os.path.abspath('./model/RISC_BREXIT_20180209_run.nlogo')
 
@@ -50,6 +50,7 @@ def initialiser():
 
 
 def run_simulation(driver):
+    print(driver)
     tf = 'TRUE' if driver[0] else 'FALSE'
     netlogo.command('set succession-issue? ' + tf)
     tf = 'TRUE' if driver[1] else 'FALSE'
@@ -60,6 +61,7 @@ def run_simulation(driver):
     netlogo.command('set industrialization? ' + tf)
     netlogo.command('get_ensembles')
 
-
-with mp.Pool(mp.cpu_count(), initializer=initialiser) as executor:
+print(mp.cpu_count())
+print(drivers)
+with mp.Pool(mp.cpu_count()-1, initializer=initialiser) as executor:
     executor.map(run_simulation, drivers)

@@ -12,8 +12,8 @@ TOTAL_YEARS = 13
 
 # Drivers are in the order given in figure 10 of the paper:
 # Ge, J. et al. Not one Brexit
-# How local context and social processes influence policy analysis 
-# PloS one, Public Library of Science 
+# How local context and social processes influence policy analysis
+# PloS one, Public Library of Science
 # San Francisco, CA USA, 2018, 13, e0208451
 drivers = (
           (False, False, False, False), (False, False, False, True),
@@ -27,14 +27,15 @@ drivers = (
           )
 
 
-def get_fp(driver):
+def get_fp(driver, i=1):
     # Get the filepath of a driver
+    # If no index is given then get first run
     fp = results_dir
     fp = fp + 'true-' if driver[0] else fp + 'false-'
     fp = fp + 'true-' if driver[1] else fp + 'false-'
     fp = fp + 'true-' if driver[2] else fp + 'false-'
     fp = fp + 'true-' if driver[3] else fp + 'false-'
-    return fp + '1.csv'
+    return fp + str(i) + '.csv'
 
 
 def driver_name(driver):
@@ -62,7 +63,7 @@ def mean_absolute_scaled_error(observations_output, estimates_output):
     """ The observation and estimate must be of a single output."""
     result = 0
     # mean absolute error
-    mae = np.mean([abs(observations_output[year] - 
+    mae = np.mean([abs(observations_output[year] -
                        estimates_output[year])
                     for year in YEARS])
     denom = sum([abs(observations_output[year] - observations_output[year-1])
@@ -112,7 +113,7 @@ def plot_ensemble_results(driver):
     #                    max(max(Y), max(Y_obs)))
     fig.suptitle(driver_name(driver))
     plt.show()
-    
+
 
 # choose an error function to compare a simulation against the observation
 error_func = mean_absolute_scaled_error

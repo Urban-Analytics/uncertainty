@@ -9,7 +9,7 @@ import helper
 
 
 # set manually
-k = 10  # number of runs in ensembles
+k = 100  # number of runs in ensembles
 obs_unc = 0  # observation uncertainty
 sigma = 3  # history matching threshold (commonly chosen as 3)
 
@@ -35,7 +35,7 @@ def v_ens_x(driver):
     for output in helper.OUTPUTS:
         r = []
         for i in range(k):
-            df = pd.read_csv(helper.get_fp(driver)[:-5] + str(i+1) + '.csv')
+            df = pd.read_csv(helper.get_fp(driver, i+1))
             r.append(df[output].tolist())
         for a in range(k-1):
             for b in range(a+1, k):
@@ -127,7 +127,7 @@ def history_matching():
     """ Run waves of history matching until the new plausible space
         is either empty (the whole space is implausible)
         or is unchanged from the previous wave.
-        
+
         Returns: plausible space, uncertainty of each output
     """
     plaus_space = []
@@ -135,8 +135,11 @@ def history_matching():
     while len(new_plaus_space) > 0 and len(plaus_space) != len(new_plaus_space):
         plaus_space = new_plaus_space
         new_plaus_space, implaus_scores = wave(plaus_space)
-        #print('implausiblity scores: ', implaus_scores)
-        #print('new plausible space:', new_plaus_space)
+        print('implausiblity scores: ', implaus_scores)
+        print('new plausible space:', new_plaus_space)
+        print('Ensemble variance:', v_ens)
+        print('Model discrepancy:', m_disc)
+        print('')
     uncert = dict((output, v_ens[output] +
                            m_disc[output] +
                            obs_unc)
@@ -148,4 +151,3 @@ if __name__ == '__main__':
     plaus_space, uncert = history_matching()
     print('Final plausible space:', plaus_space)
     print('Uncertainties:', uncert)
-    

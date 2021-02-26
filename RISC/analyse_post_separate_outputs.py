@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import helper
 
 # number of ensembles run with results saved
-k = 10
+k = 100
 # drivers to be ploted (as indexed in helper.drivers)
 driver_indexes = range(16)
 thresholds = np.linspace(0, 50, 201)
@@ -26,7 +26,7 @@ def get_post(driver_i):
             for t in range(len(thresholds))]
     driver = helper.drivers[driver_i]
     for i in range(k):
-        df = pd.read_csv(helper.get_fp(driver)[:-5] + str(i+1) + '.csv')
+        df = pd.read_csv(helper.get_fp(driver, i+100))
         for output in helper.OUTPUTS:
             obs = helper.observations[output].tolist()
             est = df[output].tolist()
