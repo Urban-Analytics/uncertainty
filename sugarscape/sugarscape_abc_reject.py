@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 from sugarscape_cg.model import SugarscapeCg
 
 
-run_id = '210209_134031'
 obs = 66
 yticks = range(1, 6)
 xticks = range(1, 18)
@@ -73,22 +72,22 @@ def plot_results(theta=None):
     Y = [t[0] for t in theta]
     p = plt.hist2d(x=X, y=Y, weights=W, density=True,
                    bins=((xticks, yticks)), cmap='magma')
-    plt.xlabel('max vision')
-    plt.ylabel('max metabolism')
-    plt.xticks([x+0.5 for x in xticks[:-1]], xticks[:-1])
-    plt.yticks([y+0.5 for y in yticks[:-1]], yticks[:-1])
+    plt.xlabel('max vision', fontsize=16)
+    plt.ylabel('max metabolism', fontsize=14)
+    plt.xticks([x+0.5 for x in xticks[:-1]], xticks[:-1], fontsize=12)
+    plt.yticks([y+0.5 for y in yticks[:-1]], yticks[:-1], fontsize=12)
     plt.colorbar(p[3])
     fig.tight_layout()
     #plt.show()
     plt.savefig('results/%s/abc_reject_results.pdf' % run_id)
 
 
-# results = run_it()
-# with open('results/%s/abc_reject.pkl' % run_id, 'wb') as pfile:
-#         hm_results = pickle.dump(results, pfile)
-#
-# theta = [r[0] for r in results]
-# total_attempts = sum([r[1] for r in results])
-# print('Total attempts:', total_attempts)
-# plot_results(theta)
-plot_results()
+results = run_it()
+with open('results/%s/abc_reject.pkl' % run_id, 'wb') as pfile:
+        hm_results = pickle.dump(results, pfile)
+
+theta = [r[0] for r in results]
+total_attempts = sum([r[1] for r in results])
+print('Total attempts:', total_attempts)
+plot_results(theta)
+#plot_results()

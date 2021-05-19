@@ -3,7 +3,6 @@ import tempfile
 import numpy as np
 import pyabc
 import pickle
-import shelve
 from time import strftime
 import matplotlib.pyplot as plt
 #from matplotlib.colors import LinearSegmentedColormap
@@ -36,38 +35,54 @@ def run():
 
     history = abc.run(max_nr_populations=4)
 
+    #TODO change the save method
     # save abc history
-    db = shelve.open('results/%s/abc_history.shelf' % id)
-    db['history'] = history
-    db.close()
+    results = []
+    for t in range(history.max_t+1):
+        df, w = history.get_distribution(m=0, t=t)
+        results.append({'df': df, 'w': w})
+    with open('results/%s/abc_history.pkl' % id, 'wb') as pfile:
+        pickle.dump(results, pfile)
     return history
 
 
-def plot(history):
+def plot(history=None):
+    if history is None:
+        with open('results/%s/abc_history.pkl' % id, 'rb') as pfile:
+            results = pickle.load(pfile)
+            print(len(results))
+            df = results[-1]['df']
+            w = results[-1]['w']
+    else:
+        df, w = history.get_distribution(m=0, t=history.max_t)
     # plot posterior
     fig, ax = plt.subplots()
-    df, w = history.get_distribution(m=0, t=history.max_t)
     pyabc.visualization.plot_kde_2d(
         df, w, x="scout_prob", y="survival_prob",
         xmin=0, xmax=0.5, ymin=0.95, ymax=1,
         ax=ax, shading="auto", cmap='magma')
-    #plt.show()
-    plt.savefig('results/%s/abc_posterior.pdf' % id)
+    plt.xlabel('scouting probability', fontsize=16)
+    plt.ylabel('survival probability', fontsize=16)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.show()
+    #plt.savefig('results/%s/abc_posterior.pdf' % id)
 
-    # plot sampling info
-    _, arr_ax = plt.subplots(3)
-    pyabc.visualization.plot_sample_numbers(history, ax=arr_ax[0])
-    pyabc.visualization.plot_epsilons(history, ax=arr_ax[1])
-    pyabc.visualization.plot_effective_sample_sizes(history, ax=arr_ax[2])
+    if history is not None:
+        # plot sampling info
+        _, arr_ax = plt.subplots(3)
+        pyabc.visualization.plot_sample_numbers(history, ax=arr_ax[0])
+        pyabc.visualization.plot_epsilons(history, ax=arr_ax[1])
+        pyabc.visualization.plot_effective_sample_sizes(history, ax=arr_ax[2])
 
-    #plt.gcf().set_size_inches((12, 8))
-    plt.gcf().tight_layout()
-    #plt.show()
-    plt.savefig('results/%s/abc_analysis.pdf' % id)
+        #plt.gcf().set_size_inches((12, 8))
+        plt.gcf().tight_layout()
+        #plt.show()
+        #plt.savefig('results/%s/abc_analysis.pdf' % id)
 
 if __name__ == '__main__':
     history = run()
     # db = shelve.open('results/%s/abc_history.shelf' % id)
     # history = db['history']
     # db.close()
-    plot(history)
+    plot()

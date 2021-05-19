@@ -100,8 +100,10 @@ def plot_wave(wave, show=True):
                          c='dimgrey')
     plt.xlim(bounds['scout_prob'][0]-0.005, bounds['scout_prob'][1]+0.005)
     plt.ylim(bounds['survival_prob'][0]-0.005, bounds['survival_prob'][1]+0.005)
-    plt.xlabel('scouting probability')
-    plt.ylabel('survival probability')
+    plt.xlabel('scouting probability', fontsize=16)
+    plt.ylabel('survival probability', fontsize=16)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
     if show:
         plt.show()
 
@@ -174,12 +176,11 @@ def run_waves():
                         'implaus_scores': implaus_scores})
         wave_no += 1
         print(len(new_plaus_space))
-        #plot_wave(results[-1])
+        plot_wave(results[-1])
         # save results at each iteration so they can be examined during runtime
         save_results(results_dir)
 
 
 if __name__ == '__main__':
     #run_waves()
-    #plot_saved_results('210125_151327', save=False)
-    plot_saved_results('210209_100055', save=False)
+    plot_saved_results('210510_112653', save=True)

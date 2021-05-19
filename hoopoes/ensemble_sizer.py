@@ -44,8 +44,10 @@ def plot_ensemble_variances():
         for row in reader:
             Y = [float(r) for r in row[2:]]
             plt.plot(K, Y)
-    plt.xlabel('Total runs')
-    plt.ylabel('Ensemble variance')
+    plt.xlabel('Total runs', fontsize=16)
+    plt.ylabel('Ensemble variance', fontsize=16)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
     plt.show()
 
 if __name__ == '__main__':
