@@ -11,7 +11,7 @@ k = 100
 plaus_space = [12, 13, 14, 15]
 
 # each output has an individually measured uncertainty
-uncert = {'n small': 1.48, 'n medium': 2.167, 'n large': 5.373}
+uncert = {'n small': 1.809, 'n medium': 2.232, 'n large': 5.558}
 
 posteriors = dict((x, 0) for x in plaus_space)
 # each possible set of factors is referred to as a "driver"
@@ -26,7 +26,7 @@ for driver_i in plaus_space:
             est = df[output].tolist()
             d = helper.error_func(obs, est)  # compute distance
             # if one output fails to pass, the whole simulation has failed
-            if d > uncert[output] + 1.15:
+            if d > uncert[output] + 0.5:
                 passed = False
                 break
         if passed:
@@ -37,10 +37,10 @@ print(posteriors)
 Y = [posteriors[x]/k for x in plaus_space]
 print(Y)
 plt.bar(plaus_space, Y, color='sandybrown')
-plt.xticks(plaus_space, (13, 14, 15, 16))
-plt.yticks((0, 0.25, 0.5, 0.75, 1.0), (0, 0.25, 0.5, 0.75, 1.0))
-plt.ylabel('% accepted runs')
-plt.xlabel('model no.')
+plt.xticks(plaus_space, (13, 14, 15, 16), fontsize=14)
+plt.yticks((0, 0.25, 0.5, 0.75, 1.0), (0, 0.25, 0.5, 0.75, 1.0), fontsize=14)
+plt.ylabel('% accepted runs', fontsize=16)
+plt.xlabel('model no.', fontsize=16)
 plt.tight_layout()
 #fig.subplots_adjust(left=0.15)
 plt.show()

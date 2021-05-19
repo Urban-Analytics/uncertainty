@@ -59,21 +59,18 @@ def percentage_error(observations_output, estimates_output):
     return result / len(YEARS)
 
 
+def mean_absolute_error(observations_output, estimates_output):
+    return np.mean([abs(observations_output[year] - estimates_output[year])
+                    for year in YEARS])
+
+
 def mean_absolute_scaled_error(observations_output, estimates_output):
     """ The observation and estimate must be of a single output."""
     result = 0
-    # mean absolute error
-    mae = np.mean([abs(observations_output[year] -
-                       estimates_output[year])
-                    for year in YEARS])
-    denom = sum([abs(observations_output[year] - observations_output[year-1])
+    mae = mean_absolute_error(observations_output, estimates_output)
+    scale = sum([abs(observations_output[year] - observations_output[year-1])
                  for year in YEARS[1:]]) / (TOTAL_YEARS - 1)
-    for year in YEARS:
-        obs = observations_output[year]
-        est = estimates_output[year]
-        error = obs - est
-        result += error / denom
-    return abs(result / TOTAL_YEARS)
+    return mae / scale
 
 
 def plot_simulation_results():

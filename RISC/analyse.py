@@ -43,16 +43,27 @@ def v_ens_x(driver):
                                         helper.error_func(r[b], r[a])))
     return dict((c, np.var(results[c], ddof=1)) for c in helper.OUTPUTS)
 
+# measure model disc through mean
+#def m_disc_X(plaus_space):
+    #""" Calculate the average model discrepancy over all plausible drivers."""
+    #results = dict((output, 0) for output in helper.OUTPUTS)
+    #for di in plaus_space:
+        #driver_results = m_disc_x(helper.drivers[di])
+        #for output in helper.OUTPUTS:
+            #results[output] += driver_results[output]
+    #return dict((c, round(results[c]/len(plaus_space), 3))
+                #for c in helper.OUTPUTS)
 
+
+# measure model disc through var
 def m_disc_X(plaus_space):
     """ Calculate the average model discrepancy over all plausible drivers."""
-    results = dict((output, 0) for output in helper.OUTPUTS)
+    results = dict((output, []) for output in helper.OUTPUTS)
     for di in plaus_space:
         driver_results = m_disc_x(helper.drivers[di])
         for output in helper.OUTPUTS:
-            results[output] += driver_results[output]
-    return dict((c, round(results[c]/len(plaus_space), 3))
-                for c in helper.OUTPUTS)
+            results[output].append(driver_results[output])
+    return dict((c, np.var(results[c], ddof=1)) for c in helper.OUTPUTS)
 
 
 def m_disc_x(driver):

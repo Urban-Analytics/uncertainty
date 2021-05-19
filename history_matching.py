@@ -7,9 +7,6 @@ import os
 # Required to set before running waves:
 sim_func = None  # to run the simulation
 error_func = None  # to calculate the error between simulation and observation
-ensemble_func = None  # to run an ensemble of simulations
-# to run the model with different parameters where each parameter is run once
-variety_func = None
 
 # Optional to set:
 obs_var = 0  # the uncertainty in the observation (as variance)
@@ -18,6 +15,12 @@ ensemble_samples = 4  # total samples used to average ensemble variance
 # include model discrepancy when measuring uncertainty?
 # sometimes it adds too much uncertainty resulting in all models accepted
 include_model_disc = True
+
+# May be overridden
+ensemble_func = None  # to run an ensemble of simulations
+# to run the model with different parameters where each parameter is run once
+variety_func = None
+
 
 # Initially uknown and automatically calculated:
 ens_var = 0  # ensemble variance
@@ -63,7 +66,8 @@ def recalculate_uncertainties(X):
     for run_results in all_X_run_results:
         errors = [error_func(r) for r in run_results]
         vars.append(np.var(errors, ddof=1))
-        discrepancies.append(np.mean(errors))
+        #discrepancies.append(np.mean(errors))
+        discrepancies.append(np.var(errors, ddof=1))
     globals()['ens_var'] = np.mean(vars)
     if include_model_disc:
         globals()['model_disc'] = np.mean(discrepancies)
@@ -101,12 +105,14 @@ def wave(plaus_space):
     # Get the new ensemble variance using a selection of three inputs from X,
     # where these inputs are evenly spread across the plausible space.
     # TODO: an optimised design, such as LHS, would be preferred.
+    print('Getting ensemble variance...')
     test_space = [plaus_space[i]
                  for i in range(0,
                                 len(plaus_space),
                                 math.ceil(len(plaus_space)/ensemble_samples))]
     recalculate_uncertainties(test_space)
     new_plaus_space = []
+    print('Getting implausibility scores...')
     Y = variety_func(plaus_space)
     implaus_scores = [_implaus(y) for y in Y]
     for i in range(len(plaus_space)):

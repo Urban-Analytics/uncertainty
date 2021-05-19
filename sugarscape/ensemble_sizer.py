@@ -49,9 +49,12 @@ def plot_all_results():
     style = ('-', '--', '-.')
     for i in range(3):
         plt.plot(K, Y[i], linestyle=style[i])
-    plt.xlabel('ensemble size')
-    plt.ylabel('ensemble variance')
+    plt.xlabel('ensemble size', fontsize=16)
+    plt.ylabel('ensemble variance', fontsize=16)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
     plt.show()
 
 
-plot_all_results()
+#plot_all_results()
+get_results_of_x()

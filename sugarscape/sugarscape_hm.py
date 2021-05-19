@@ -86,7 +86,7 @@ def plot_saved_results(results_dir, save=False):
 def save_results(results_dir):
     """ Save results of all waves using pickle. """
     # overwrites save of the previous wave
-    filepath = '%s/hm.pkl' % results_dir
+    filepath = 'results/%s/hm.pkl' % results_dir
     with open(filepath, 'wb') as pfile:
         pickle.dump(results, pfile)
 

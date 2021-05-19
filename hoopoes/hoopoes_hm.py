@@ -30,7 +30,7 @@ history_matching.ensemble_func = pyrun.run_ensembles
 history_matching.variety_func = pyrun.run_varieties
 # We're excluding model discrepancy as it causes the uncertainty to be too high,
 # resulting in almost the whole sample space being accepted.
-history_matching.include_model_disc = False
+history_matching.include_model_disc = True
 
 history_matching.k = 30  # runs in an ensemble, change as desired
 samples = 50  # change as desired
