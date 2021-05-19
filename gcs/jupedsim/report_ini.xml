@@ -1,0 +1,38 @@
+<JPSreport project="JPS-Project" version="0.8">
+
+    <geometry file="geo.xml" />
+    <output location="results/report_results_210514_103008" />
+
+    <trajectories format="txt" unit="m">
+        <file name="traj.txt" />
+        <path location="./results/run_results_210514_103008" />
+    </trajectories>
+
+    <measurement_areas unit="m">
+        <area_B id="1" type="BoundingBox" zPos="None">
+            <vertex px="38" py="8" />
+            <vertex px="38" py="22" />
+            <vertex px="50" py="22" />
+            <vertex px="50" py="8" />
+        </area_B>
+        <area_B id="2" type="BoundingBox" zPos="None">
+            <vertex px="8" py="8" />
+            <vertex px="8" py="22" />
+            <vertex px="20" py="22" />
+            <vertex px="20" py="8" />
+        </area_B>
+    </measurement_areas>
+
+    <method_D enabled="true">
+        <measurement_area id="1" start_frame="240" stop_frame="None" local_IFD="false" />
+        <measurement_area id="2" start_frame="240" stop_frame="None" local_IFD="false" />
+        <one_dimensional enabled="false" />
+        <global_IFD enabled="true" />
+        <cut_by_circle enabled="false" radius="1.0" edges="10" />
+        <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20" />
+        <use_blind_points enabled="true" />
+        <vel_calculation type="Voronoi" />
+    </method_D>
+
+
+</JPSreport>
