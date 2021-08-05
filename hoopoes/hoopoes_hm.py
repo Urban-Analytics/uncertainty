@@ -28,14 +28,10 @@ history_matching.error_func = pyrun.error
 # so tell history_matching where those functions are.
 history_matching.ensemble_func = pyrun.run_ensembles
 history_matching.variety_func = pyrun.run_varieties
-# We're excluding model discrepancy as it causes the uncertainty to be too high,
-# resulting in almost the whole sample space being accepted.
-history_matching.include_model_disc = True
 
 history_matching.k = 30  # runs in an ensemble, change as desired
 samples = 50  # change as desired
 
-results = []
 
 
 def bind_list(X, limits):
@@ -79,7 +75,7 @@ def resample(X):
     return new_X.tolist()
 
 
-def save_results(results_dir):
+def save_results(results, results_dir):
     """ Save results of all waves using pickle. """
     # overwrites save of the previous wave
     filepath = '%s/hm.pkl' % results_dir
@@ -114,22 +110,26 @@ def plot_saved_results(results_dir, save=False):
     for wave in results:
         if save:
             plot_wave(wave, show=False)
-            plt.savefig('results/%s/wave_%d.pdf' % (results_dir, wave['wave_no']))
+            plt.savefig('results/%s/wave_%d.eps' % (results_dir, wave['wave_no']))
         else:
             plot_wave(wave, show=True)
 
 
-def init_sample():
+def init_sample(seed=None):
     """ Use LHS design to create samples for the first wave. """
-    X = lhsmdu.sample(DIMENSIONS, samples)
+    if seed:
+        X = lhsmdu.sample(DIMENSIONS, samples, randomSeed=seed)
+    else:
+        X = lhsmdu.sample(DIMENSIONS, samples)
     X[0] = bind_list(X[0], 'scout_prob')
     X[1] = bind_list(X[1], 'survival_prob')
+    A = X.tolist()
     X = X.T
     X = X.tolist()
     return X
 
 
-def has_plaus_space_decreased():
+def has_plaus_space_decreased(results):
     """ Measure if the area of the latest plausible space
         is smaller than the previous.
 
@@ -154,21 +154,25 @@ def has_plaus_space_decreased():
         return True
 
 
-def run_waves():
-    results_dir = 'results/%s' % strftime('%y%m%d_%H%M%S')
+def run_waves(results_dir=None):
+    if results_dir is None:
+        results_dir = 'results/%s' % strftime('%y%m%d_%H%M%S')
     os.mkdir(results_dir)
+    results = []
     wave_no = 1
     new_plaus_space = init_sample()
     plaus_space = []
-    # stop if the plausible space has not narrowed any smaller
-    # or if only one or no samples are plausible
-    #while len(new_plaus_space) > 1 and has_plaus_space_decreased():
-    while wave_no < 7:
-        plaus_space = new_plaus_space
+    # Stop running waves if only one or no samples are plausible,
+    # or the plausible space has not narrowed any smaller,
+    # or there have been 5 waves
+    # (narrowing of the plausible space is usually tiny by the fifth wave).
+    while len(new_plaus_space) > 1 and has_plaus_space_decreased(results) and wave_no < 5:
         if wave_no > 1:
             # Explore around the plausible space found,
             # rather than retesting the same samples as the previous wave
-            plaus_space = resample(plaus_space)
+            plaus_space = resample(new_plaus_space)
+        else:
+            plaus_space = new_plaus_space
         uncert, new_plaus_space, implaus_scores = history_matching.wave(plaus_space)
         results.append({'wave_no': wave_no,
                         'uncert': uncert,
@@ -176,11 +180,11 @@ def run_waves():
                         'implaus_scores': implaus_scores})
         wave_no += 1
         print(len(new_plaus_space))
-        plot_wave(results[-1])
+        #plot_wave(results[-1])
         # save results at each iteration so they can be examined during runtime
-        save_results(results_dir)
+        save_results(results, results_dir)
 
 
 if __name__ == '__main__':
     #run_waves()
-    plot_saved_results('210510_112653', save=True)
+    plot_saved_results('210125_151327', save=True)

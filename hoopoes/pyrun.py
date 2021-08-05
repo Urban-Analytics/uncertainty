@@ -15,9 +15,6 @@ criteria = {
     'variation': (10, 15),
     #  the average percentage of territories that lack one or both alpha animals
     'vacancies': (15, 30)}
-abundance_m = 125
-variation_m = 12.5
-vacancies_m = 22.5
 
 YEARS = 22
 MONTHS = 12
@@ -26,9 +23,8 @@ modelfile = os.path.abspath('./SM2_Hoopoes.nlogo')  # requires netlogo v5
 
 
 def initialiser():
-    # we need to set the instantiated netlogo
-    # link as a global so run_simulation can
-    # use it
+    # We need to set the instantiated netlogo
+    # link as a global so run_simulation can use it
     global netlogo
     netlogo = pyNetLogo.NetLogoLink(gui=False,
                                     netlogo_home='/home/josie/Downloads/netlogo-5.3.1-64/',
@@ -72,6 +68,7 @@ def run_simulation(x):
     #c1_passed  = within_range('abundance', np.mean(total_birds))
     #c2_passed = within_range('variation', np.std(total_birds, ddof=1))
     #c3_passed = within_range('vacancies', np.mean(total_vacancies))
+    netlogo.kill_workspace()
     return(np.mean(total_birds),
            np.std(total_birds, ddof=1),
            np.mean(total_vacancies))
@@ -85,7 +82,12 @@ def error(results):
     """
     def within_range(criterion, value):
         return criteria[criterion][0] <= value <= criteria[criterion][1]
+    # actual results
     abundance, variation, vacancies = results
+    # expected results
+    abundance_m = np.mean(criteria['abundance'])
+    variation_m = np.mean(criteria['variation'])
+    vacancies_m = np.mean(criteria['vacancies'])
     # calculate cost
     abundance_e = (0 if within_range('abundance', abundance)
                    else ((abundance_m - abundance) / abundance_m)**2)
@@ -127,7 +129,7 @@ def run_varieties(X):
 
 
 def run_solo(x):
-    """ Run a single instance of the parameters x.
+    """ Run a single instance with the parameters x.
 
     x = (scout_prob, survival_prob)
     """
