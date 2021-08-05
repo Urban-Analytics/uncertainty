@@ -12,9 +12,6 @@ error_func = None  # to calculate the error between simulation and observation
 obs_var = 0  # the uncertainty in the observation (as variance)
 k = 25  # total ensembles run for each input, change as desired
 ensemble_samples = 4  # total samples used to average ensemble variance
-# include model discrepancy when measuring uncertainty?
-# sometimes it adds too much uncertainty resulting in all models accepted
-include_model_disc = True
 
 # May be overridden
 ensemble_func = None  # to run an ensemble of simulations
@@ -69,8 +66,7 @@ def recalculate_uncertainties(X):
         #discrepancies.append(np.mean(errors))
         discrepancies.append(np.var(errors, ddof=1))
     globals()['ens_var'] = np.mean(vars)
-    if include_model_disc:
-        globals()['model_disc'] = np.mean(discrepancies)
+    globals()['model_disc'] = np.mean(discrepancies)
     globals()['total_uncertainty'] = ens_var + obs_var + model_disc
 
 
