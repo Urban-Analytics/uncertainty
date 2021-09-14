@@ -68,7 +68,6 @@ def run_simulation(x):
     #c1_passed  = within_range('abundance', np.mean(total_birds))
     #c2_passed = within_range('variation', np.std(total_birds, ddof=1))
     #c3_passed = within_range('vacancies', np.mean(total_vacancies))
-    netlogo.kill_workspace()
     return(np.mean(total_birds),
            np.std(total_birds, ddof=1),
            np.mean(total_vacancies))
@@ -134,14 +133,12 @@ def run_solo(x):
     x = (scout_prob, survival_prob)
     """
     initialiser()
-    return run_simulation(x)
+    y = run_simulation(x)
+    globals()['netlogo'].kill_workspace()
+    return y
 
 
 if __name__ == '__main__':
-    results = []
-    with mp.Pool(mp.cpu_count(), initializer=initialiser) as executor:
-        for entry in executor.map(run_simulation, [[0.3, 0.98], [0.2, 0.95]]):
-                results.append(entry)
-    print(results)
-    print(error(results[0]))
-    print(error(results[1]))
+    X = [[0.3, 0.98], [0.2, 0.95],[0.3, 0.98], [0.2, 0.95], [0.3, 0.98], [0.2, 0.95]]
+    run_solo(X[0])
+    

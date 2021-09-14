@@ -9,6 +9,7 @@ import multiprocessing as mp
 from tabulate import tabulate
 import pickle
 import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
 import pyabc  # for plotting
 
 import helper
@@ -74,14 +75,14 @@ def plot_results(run_id, suffix=''):
     pyabc.visualization.plot_kde_2d(
         params, w, x="scout prob", y="survival prob",
         xmin=0, xmax=0.5, ymin=0.95, ymax=1,
-        ax=ax, cmap='magma')
+        ax=ax, cmap='magma', norm=Normalize(0, 225))
     plt.xlabel('scouting probability', fontsize=16)
     plt.ylabel('survival probability', fontsize=16)
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
     fig.subplots_adjust(bottom=0.15)
     #plt.show()
-    plt.savefig('%s/abc_posterior%s.eps' % (run_id, suffix))
+    plt.savefig('%s/abc_posterior%s.pdf' % (run_id, suffix))
     plt.close()
 
 

@@ -18,6 +18,8 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from shapely.geometry import Polygon, Point
+import pandas as pd
+from scipy import spatial
 
 import hoopoes_hm as hhm
 import hoopoes_abc_reject as abcreject
@@ -44,7 +46,8 @@ except FileNotFoundError:
 def get_observations():
     """ Sample the parameter space and get observations for each sample. """
     hhm.samples = SAMPLES
-    X = hhm.init_sample(seed=1)
+    X = hhm.init_sampparams = pd.DataFrame([(r.scout_prob, r.survival_prob) for r in results],
+                                   columns=('scout prob', 'survival prob'))
     X = [(round(x[0], ROUNDING), round(x[1], ROUNDING)) for x in X]
     results = np.empty(SAMPLES, dtype=object)
     # Get 10 observations so we have some observation uncertainty
@@ -76,31 +79,28 @@ def run_HM():
         index += 1
 
 
-def analyse_HM():
+def analyse_HM_obs(obs):
     """ Analyse the HM results. """
-    total_failures = 0
-    total_empties = 0
+    empty, failed = 0, 0
     cum_space_decrease = np.zeros(2)
-    for obs in observations:
-        if os.path.isdir(obs.results_dir):  # check there are results
-            accepted_space = helper.last_wave(obs.results_dir)
-            if len(accepted_space) == 0:
-                print(obs.results_dir, 'Empty plausible space.')
-                total_empties += 1
-            else:
-                target = helper.split(obs.parameters)
-                bounds = helper.get_bounds(accepted_space)
-                for d in range(DIMENSIONS):
-                    cum_space_decrease[d] += \
-                            (helper.bound_len(bounds[PARAMETERS[d]]) /
-                             helper.bound_len(ORIG_BOUNDS[PARAMETERS[d]]))
-                    if not helper.in_bound(target[d], bounds[PARAMETERS[d]]):
-                        total_failures += 1
-                        print(obs.results_dir, 'Target parameter discarded')
-    print('Total where target parameter was discarded: %d' % total_failures)
-    print('Total empty plausible spaces: %d' % total_empties)
-    print('Average space decrease for %s: %d' % (PARAMETERS[0], cum_space_decrease[0]))
-    print('Average space decrease for %s: %d' % (PARAMETERS[1], cum_space_decrease[1]))
+    if os.path.isdir(obs.results_dir):  # check there are results
+        accepted_space = helper.last_wave(obs.results_dir)
+        if len(accepted_space) == 0:
+            #print(obs.results_dir, 'Empty plausible space.')
+            empty = 1
+        else:
+            target = helper.split(obs.parameters)
+            bounds = helper.get_bounds(accepted_space)
+            for d in range(DIMENSIONS):
+                cum_space_decrease[d] = \
+                        (helper.bound_len(bounds[PARAMETERS[d]]) /
+                         helper.bound_len(ORIG_BOUNDS[PARAMETERS[d]]))
+                if not helper.in_bound(target[d], bounds[PARAMETERS[d]]):
+                    failed = 1
+                    #print(obs.results_dir, 'Target parameter discarded')
+    return empty, failed, cum_space_decrease
+
+
 
 
 def run_abc_reject():
@@ -126,52 +126,63 @@ def run_abc_reject():
             abcreject.go(obs.results_dir)
 
 
-def abc_reject_analyse():
-    def region_poly(dir, suffix):
-        with open('%s/abc_reject%s.pkl' % (dir, suffix), 'rb') as pfile:
-            results = pickle.load(pfile)
-        points = np.empty((1000, 2))
-        for i in range(1000):
-            points[i][0] = results[i].scout_prob
-            points[i][1] = results[i].survival_prob
-        return Polygon(points)
+def abc_reject_analyse(obs):
+    """ Check if ABC failed to retain the correct parameter without and with HM prior."""
+    failure_results = [1, 1]
+    suffixes = ('', '_hm')
+    if (os.path.exists('%s/abc_reject.pkl' % obs.results_dir) and
+                os.path.exists('%s/abc_reject_hm.pkl' % obs.results_dir)):
+        for test in range(2):
+            with open('%s/abc_reject%s.pkl' % (obs.results_dir, suffixes[test]), 'rb') as pfile:
+                results = pickle.load(pfile)
+            params = pd.DataFrame([(r.scout_prob, r.survival_prob) for r in results],
+                                   columns=('scout prob', 'survival prob'))
+            tree = spatial.KDTree(params)
+            idx = tree.query((obs.parameters.scout_prob, obs.parameters.survival_prob))[1]
+            if results[idx].error > 0.5:
+                failure_results[test] = 0
+    return failure_results
+
+def analyse():
+    hm_total_failures = 0
+    hm_total_empties = 0
+    hm_cum_space_decrease = np.zeros(2)
+    abc_total_failures = 0
+    abc_with_hm_total_failures = 0
+    for obs in observations:
+        empty, failed, cum_space = analyse_HM_obs(obs)
+        hm_total_empties += empty
+        hm_total_failures += failed
+        hm_cum_space_decrease += cum_space
+        if empty == 0 and failed == 0:
+            without_hm, with_hm = abc_reject_analyse(obs)
+            abc_total_failures += without_hm
+            abc_with_hm_total_failures += with_hm
+
+    print('HM results:')
+    print('Total where target parameter was discarded: %d' % hm_total_failures)
+    print('Total empty plausible spaces: %d' % hm_total_empties)
+    print('Average space decrease for %s: %d' % (PARAMETERS[0], hm_cum_space_decrease[0]))
+    print('Average space decrease for %s: %d' % (PARAMETERS[1], hm_cum_space_decrease[1]))
+    print('\nABC results:')
+    print('Total where target parameter was discarded without HM prior: %d' % abc_total_failures)
+    print('Total where target parameter was discarded with HM prior: %d' % abc_with_hm_total_failures)
+
+
+def compare_runs():
     def total_runs(dir, suffix):
         with open('%s/abc_reject%s.pkl' % (dir, suffix), 'rb') as pfile:
             results = pickle.load(pfile)
         return sum(r.attempts for r in results)
-    abc_better = 0
-    hm_better = 0
-    both_poor = 0
-    both_good = 0
     runs_with_hm = []
     runs_without_hm = []
     saves = []
     for obs in observations:
         if (os.path.exists('%s/abc_reject.pkl' % obs.results_dir) and
                     os.path.exists('%s/abc_reject_hm.pkl' % obs.results_dir)):
-            truth = Point(obs.parameters.scout_prob, obs.parameters.survival_prob)
-            region_without_hm = region_poly(obs.results_dir, '')
-            region_with_hm = region_poly(obs.results_dir, '_hm')
-            without_hm = region_without_hm.intersects(truth)
-            with_hm = region_with_hm.intersects(truth)
             runs_with_hm.append(total_runs(obs.results_dir, '_hm'))
             runs_without_hm.append(total_runs(obs.results_dir, ''))
             saves.append(runs_without_hm[-1] - runs_with_hm[-1])
-            if without_hm and with_hm:
-                both_good +=1
-            elif not without_hm and not with_hm:
-                both_poor += 1
-            elif without_hm and not with_hm:
-                abc_better += 1
-            elif not without_hm and with_hm:
-                hm_better += 1
-        else:
-            saves.append(0)
-    print('Kept correct parameters...')
-    print('... with HM-informed prior:', hm_better)
-    print('... with uninformed prior:', abc_better)
-    print('... either with or without informed prior:', both_good)
-    print('... neither with nor without informed prior:', both_poor)
     print('Average ABC runs with informed prior:', np.mean(runs_with_hm))
     print('Average ABC runs without informed prior:', np.mean(runs_without_hm))
     #print(np.mean(saves))
@@ -191,7 +202,7 @@ def abc_reject_plot():
 
 if __name__ == '__main__':
     #run_HM()
-    #analyse_HM()
+    analyse()
     #run_abc_reject()
-    abc_reject_analyse()
+    #abc_reject_analyse(observations[0])
     #abc_reject_plot()
