@@ -17,9 +17,11 @@ import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
 from shapely.geometry import Polygon, Point
 import pandas as pd
 from scipy import spatial
+import pyabc
 
 import hoopoes_hm as hhm
 import hoopoes_abc_reject as abcreject
@@ -128,8 +130,13 @@ def run_abc_reject():
 
 def abc_reject_analyse(obs):
     """ Check if ABC failed to retain the correct parameter without and with HM prior."""
+    def closest(lst, K):
+        lst = np.asarray(lst)
+        idx = (np.abs(lst - K)).argmin()
+        return idx
     failure_results = [1, 1]
     suffixes = ('', '_hm')
+    w = np.ones(1000)
     if (os.path.exists('%s/abc_reject.pkl' % obs.results_dir) and
                 os.path.exists('%s/abc_reject_hm.pkl' % obs.results_dir)):
         for test in range(2):
@@ -137,9 +144,12 @@ def abc_reject_analyse(obs):
                 results = pickle.load(pfile)
             params = pd.DataFrame([(r.scout_prob, r.survival_prob) for r in results],
                                    columns=('scout prob', 'survival prob'))
-            tree = spatial.KDTree(params)
-            idx = tree.query((obs.parameters.scout_prob, obs.parameters.survival_prob))[1]
-            if results[idx].error > 0.5:
+            X, Y, PDF = pyabc.visualization.kde.kde_2d(params, w, x="scout prob", y="survival prob")
+            x_idx = closest(X[0], obs.parameters.scout_prob)
+            y_idx = closest([y[0] for y in Y], obs.parameters.survival_prob)
+            posterior = PDF[y_idx][x_idx]
+            ratio = posterior / np.amax(PDF)
+            if ratio > 0.5:
                 failure_results[test] = 0
     return failure_results
 
