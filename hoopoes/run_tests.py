@@ -22,6 +22,7 @@ from shapely.geometry import Polygon, Point
 import pandas as pd
 from scipy import spatial
 import pyabc
+from tabulate import tabulate
 
 import hoopoes_hm as hhm
 import hoopoes_abc_reject as abcreject
@@ -37,6 +38,7 @@ PARAMETERS = ['scout_prob', 'survival_prob']
 OUTPUTS = ['abundance', 'variation', 'vacancies']
 ORIG_BOUNDS = {'scout_prob': (0, 0.5),
                'survival_prob': (0.95, 1)}
+
 
 try:
     with open('observations.pkl', 'rb') as pfile:
@@ -68,11 +70,12 @@ def get_observations():
 
 
 def run_HM():
-    """ Run history matching against the store list of observations."""
+    """ Run history matching against the stored list of observations."""
     index = 0
     for obs in observations:
-        print('index %d' % index)
-        # if the directory already exists, then we already have results
+        print('index %d' % index)  # print index to keep track of progress
+        # If the directory exists, then we already have results.
+        # This is useful if we stopped midway through running the tests.
         if not os.path.isdir(obs.results_dir):
             for output_i in range(3):
                 output_Y = [y[output_i] for y in obs.obs]
@@ -82,21 +85,30 @@ def run_HM():
 
 
 def analyse_HM_obs(obs):
-    """ Analyse the HM results. """
+    """ Analyse the HM results.
+        Returns information on
+        1) how many times no plausible paramters were found (the plausible space is empty)
+        2) how many times the found plausible space does not contain the target parameter
+        3) how much the plausible space of each parameter decreased compared to the prior.
+    """
     empty, failed = 0, 0
     cum_space_decrease = np.zeros(2)
     if os.path.isdir(obs.results_dir):  # check there are results
         accepted_space = helper.last_wave(obs.results_dir)
         if len(accepted_space) == 0:
-            #print(obs.results_dir, 'Empty plausible space.')
+            # HM didn't find any plausible parameters
             empty = 1
         else:
             target = helper.split(obs.parameters)
+            # Get the lower and upper bound of the space found to be plausible for both parameters
             bounds = helper.get_bounds(accepted_space)
             for d in range(DIMENSIONS):
+                # Calculate how much the final plausible space has decreased
+                # in comparison to the prior (ORIG_BOUNDS).
                 cum_space_decrease[d] = \
                         (helper.bound_len(bounds[PARAMETERS[d]]) /
                          helper.bound_len(ORIG_BOUNDS[PARAMETERS[d]]))
+                # Check if the observation lies within the found plausible space.
                 if not helper.in_bound(target[d], bounds[PARAMETERS[d]]):
                     failed = 1
                     #print(obs.results_dir, 'Target parameter discarded')
@@ -106,6 +118,11 @@ def analyse_HM_obs(obs):
 
 
 def run_abc_reject():
+    """ Run ABC rejection sampling using
+        1) HM results as an informed prior, and
+        2) an uninformed prior.
+        The results are stored in pickle files.
+    """
     for obs in observations[33:]:
         print(obs.parameters)
         accepted_space = helper.last_wave(obs.results_dir)
@@ -129,7 +146,8 @@ def run_abc_reject():
 
 
 def abc_reject_analyse(obs):
-    """ Check if ABC failed to retain the correct parameter without and with HM prior."""
+    """ Check if ABC failed to give the correct parameter a probability of at least 0.5.
+        This is tested both with and without the HM prior."""
     def closest(lst, K):
         lst = np.asarray(lst)
         idx = (np.abs(lst - K)).argmin()
@@ -153,7 +171,9 @@ def abc_reject_analyse(obs):
                 failure_results[test] = 0
     return failure_results
 
+
 def analyse():
+    """ Print information on results of HM and ABC (with and without HM prior)."""
     hm_total_failures = 0
     hm_total_empties = 0
     hm_cum_space_decrease = np.zeros(2)
@@ -170,16 +190,21 @@ def analyse():
             abc_with_hm_total_failures += with_hm
 
     print('HM results:')
-    print('Total where target parameter was discarded: %d' % hm_total_failures)
-    print('Total empty plausible spaces: %d' % hm_total_empties)
-    print('Average space decrease for %s: %d' % (PARAMETERS[0], hm_cum_space_decrease[0]))
-    print('Average space decrease for %s: %d' % (PARAMETERS[1], hm_cum_space_decrease[1]))
+    print('Total tests where target parameter was discarded: %d' % hm_total_failures)
+    print('Total tests resulting in an empty plausible space: %d' % hm_total_empties)
+    print('Average plausible space decrease for %s: %d' % (PARAMETERS[0], hm_cum_space_decrease[0]))
+    print('Average plausible space decrease for %s: %d' % (PARAMETERS[1], hm_cum_space_decrease[1]))
     print('\nABC results:')
-    print('Total where target parameter was discarded without HM prior: %d' % abc_total_failures)
-    print('Total where target parameter was discarded with HM prior: %d' % abc_with_hm_total_failures)
+    print('Total tests where the target parameter was discarded without HM prior: %d' % abc_total_failures)
+    print('Total tests where the target parameter was discarded with HM prior: %d' % abc_with_hm_total_failures)
 
 
 def compare_runs():
+    """ Calculate the average number of model runs used to perform
+        1) ABC with the HM-informed prior,
+        2) ABC with an uninformed prior,
+        and calculate the average number of runs saved by performing HM before ABC.
+        """
     def total_runs(dir, suffix):
         with open('%s/abc_reject%s.pkl' % (dir, suffix), 'rb') as pfile:
             results = pickle.load(pfile)
@@ -201,6 +226,9 @@ def compare_runs():
 
 
 def abc_reject_plot():
+    """ Create KDE plots of the ABC results both with and without HM prior.
+        Results are saved to file.
+    """
     for obs in observations:
         dir = obs.results_dir
         if (os.path.exists('%s/abc_reject.pkl' % obs.results_dir) and
@@ -210,9 +238,86 @@ def abc_reject_plot():
 
 
 
+def save_intervals():
+    """ Create a csv with the columns
+        run_id, hm(logical), parameter_name, real, low, high.
+    """
+    def check_intervals(real_survival_prob, real_scout_prob, run_id):
+        """ Get the four csv lines for the given run_id.
+            One line per parameter and each parameter has
+            one line for HM set as True or False.
+        """
+        csv_lines = ""
+        real_values = {"survival_prob": real_survival_prob,
+                       "scout_prob": real_scout_prob}
+        for suffix in ["", "_hm"]:
+            with open('%s/abc_reject%s.pkl' % (run_id, suffix), 'rb') as pfile:
+                results = pickle.load(pfile)
+                params = pd.DataFrame([(r.scout_prob, r.survival_prob) for r in results],
+                                      columns=helper.PARAMETERS)
+                for parameter_name in helper.PARAMETERS:
+                    high = params[parameter_name].quantile(q=0.975)
+                    low = params[parameter_name].quantile(q=0.025)
+                    median = params[parameter_name].quantile(q=0.5)
+                    csv_lines = csv_lines + "{0},{1},{2},{3},{4},{5},{6}\n".format(
+                                    str(run_id),
+                                    str(suffix == "_hm"),
+                                    parameter_name,
+                                    str(real_values[parameter_name]),
+                                    str(low),
+                                    str(high),
+                                    str(median))
+        return csv_lines
+    print("run_id,hm,parameter_name,real,low,high,median",
+          file=open("confidence_intervals.csv", "w"))
+    for obs in observations:
+        # Check there are HM results for this run
+        if (os.path.exists('%s/abc_reject.pkl' % obs.results_dir) and
+                os.path.exists('%s/abc_reject_hm.pkl' % obs.results_dir)):
+            print(check_intervals(obs.parameters.survival_prob,
+                                  obs.parameters.scout_prob,
+                                  obs.results_dir),
+                  end="",
+                  file=open("confidence_intervals.csv", "a"))
+
+
+
+def analyse_intervals():
+    """ Create a table showing information on
+        1) how often the 95% confidence intervals contain the true paramters,
+        2) the mean absolute error from calibration,
+        3) the size of the 95% confidence intervals,
+        for both ABC alone and HM+ABC.
+    """
+    table = [['ABC scout prob', None, None, None],
+             ['ABC survival prob', None, None, None],
+             ['ABC+HM scout prob', None, None, None],
+             ['ABC+HM survival prob', None, None, None]]
+    total_tests = 91  # The total tests out of 100 where HM could be performed
+    results = pd.read_csv('confidence_intervals.csv')
+    rowi = 0
+    for hm_or_not in (False, True):
+        for param in helper.PARAMETERS:
+            cf_intervals = results.query("hm == %s and \
+                                         parameter_name == '%s'" % (hm_or_not, param))[['real', 'low', 'high', 'median']]
+            # Get MAE
+            table[rowi][2] = abs(cf_intervals['real'] - cf_intervals['median']).mean()
+            # Get size of 95% CI
+            table[rowi][3] = round((cf_intervals['high'] - cf_intervals['low']).mean(), 3)
+            # Narrow down results to those where the expected parameter is in the CI
+            cf_intervals = cf_intervals.query("low <= real and real <= high")
+            # Find out how many results are left compared to the total tests run.
+            table[rowi][1] = round(cf_intervals.shape[0] / total_tests * 100, 2)
+            rowi += 1
+    print(tabulate(table, headers=('', 'Contained within 95\% CI', 'Mean Absolute Error', 'Size of 95\% CI')))
+
+
+
+
 if __name__ == '__main__':
     #run_HM()
-    analyse()
+    #analyse()
     #run_abc_reject()
     #abc_reject_analyse(observations[0])
     #abc_reject_plot()
+    analyse_intervals()
