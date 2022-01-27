@@ -111,6 +111,7 @@ def analyse_HM_obs(obs):
                 # Check if the observation lies within the found plausible space.
                 if not helper.in_bound(target[d], bounds[PARAMETERS[d]]):
                     failed = 1
+                    print(PARAMETERS[d], target[d], bounds[PARAMETERS[d]])
                     #print(obs.results_dir, 'Target parameter discarded')
     return empty, failed, cum_space_decrease
 
@@ -212,17 +213,21 @@ def compare_runs():
     runs_with_hm = []
     runs_without_hm = []
     saves = []
-    for obs in observations:
+    hm_runs = helper.hm_total_runs(observations)
+    for obs_i in reversed(range(len(observations))):
+        obs = observations[obs_i]
         if (os.path.exists('%s/abc_reject.pkl' % obs.results_dir) and
                     os.path.exists('%s/abc_reject_hm.pkl' % obs.results_dir)):
             runs_with_hm.append(total_runs(obs.results_dir, '_hm'))
             runs_without_hm.append(total_runs(obs.results_dir, ''))
             saves.append(runs_without_hm[-1] - runs_with_hm[-1])
+        else:
+            hm_runs.pop(obs_i)
     print('Average ABC runs with informed prior:', np.mean(runs_with_hm))
     print('Average ABC runs without informed prior:', np.mean(runs_without_hm))
-    #print(np.mean(saves))
-    print('Averaged saved by using HM:',
-          np.mean(np.array(saves) - np.array(helper.hm_total_runs(observations))))
+    print('Average ABC runs saved by using informed prior:', np.mean(saves))
+    print('Averaged total saved by using HM:',
+          np.mean(np.array(saves) - np.array(hm_runs)))
 
 
 def abc_reject_plot():
@@ -320,4 +325,7 @@ if __name__ == '__main__':
     #run_abc_reject()
     #abc_reject_analyse(observations[0])
     #abc_reject_plot()
-    analyse_intervals()
+    compare_runs()
+    #analyse_intervals()
+    # for obs in observations:
+    #     analyse_HM_obs(obs)
