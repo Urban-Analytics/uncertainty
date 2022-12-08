@@ -1,0 +1,35 @@
+# Information on which timestamp corresponds to
+# which time
+# and if the model was calibrated against the data
+# or against a run of the model
+timestamp zone base
+211208_151221 1 data
+220110_134905 2 data
+220117_104155 3 data
+211203_145134 1 model
+211206_103527 2 model
+220119_151812 3 model
+
+Note that zone 3 in the code is referred to as zone 0 in the paper.
+
+full_results details:
+    Data:
+        Zone 1: wave 1 (ensemble var precalculated) param tests only
+                waves 2 and 3, ens var and param tests
+        Zone 2: All waves have ens var and param tests
+                The ens var runs for this were used for zones 1 and 3.
+        Zone 3: wave 1 (ensemble var precalculated) param tests only
+                wave 2, ens var and param tests
+
+    Model:
+        Zone 1: wave 1 (ensemble var precalculated) param tests only
+                wave 2, ens var and param tests
+        Zone 2: Both waves have ens var and param tests.
+                The ens var runs for this were used for zones 1 and 3.
+        Zeon 3: wave 1 (ensemble var precalculated) param tests only
+                wave 2, ens var and param tests
+
+Note that the ens var calculated with zone 2 results that are used
+for zones 1 and 3 did not need to be run twice as the same parameters
+were used in each case. However, the results will be slightly different
+so I've left it at two sets even though one would suffice.
