@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<geometry version="0.8" caption="Projectname"  unit="m"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<rooms>
+		<room id="0" caption="mainroom">
+			<subroom id="0" closed="0" class="subroom">
+				<polygon caption="main">
+                    <vertex px="-0.25" py="0.0" />
+                    <vertex px="-2.8" py="0.0" />
+					<vertex px="-2.8" py="7.0" />
+					<vertex px="2.8" py="7.0" />
+					<vertex px="2.8" py="0.0" />
+                    <vertex px="0.25" py="0.0" />
+				</polygon>
+			</subroom>
+        </room>
+        <room id="1" caption="bottleneck">
+			<subroom id="0" closed="0" class="subroom">
+				<polygon caption="corridor">
+                    <vertex px="-0.25" py="0" />
+                    <vertex px="-0.25" py="-1" />
+                </polygon>
+                <polygon caption="corridor">
+                    <vertex px="0.25" py="-1" />
+                    <vertex px="0.25" py="0" />
+                </polygon>
+            </subroom>
+        </room>
+    </rooms>
+    <transitions>
+        <transition id="1" caption="" type="emergency"
+			room1_id="0" subroom1_id="0" room2_id="1" subroom2_id="0">
+			<vertex px="-0.25" py="0" />
+			<vertex px="0.25" py="0" />
+		</transition>
+		<transition id="2" caption="" type="emergency"
+			room1_id="1" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+			<vertex px="-0.25" py="-1" />
+			<vertex px="0.25" py="-1" />
+		</transition>
+	</transitions>
+</geometry>

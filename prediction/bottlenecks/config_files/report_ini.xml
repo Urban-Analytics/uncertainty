@@ -1,0 +1,24 @@
+<JPSreport project="JPS-Project" version="0.8">
+
+    <geometry file="runs_110_120_geo.xml" />
+    <output location="results/reports/results_221111_161309" />
+
+    <trajectories format="txt" unit="m">
+        <file name="runs_110_120_traj.txt" />
+        <path location="./results/runs_110_120/221111_161309" />
+    </trajectories>
+
+
+    <measurement_areas unit="m">
+        <area_L id="1" type="Line" zPos="None">
+            <start px="-2.8" py="0.3" />
+            <end px="2.8" py="0.3" />
+        </area_L>
+    </measurement_areas>
+
+
+    <method_A enabled="true">
+        <measurement_area id="1" frame_interval="40" />
+    </method_A>
+
+</JPSreport>
